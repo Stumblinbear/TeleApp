@@ -46,5 +46,4 @@ class TeleChat(telepot.helper.ChatHandler):
 
         for func, data in registry.get_registered().items():
             if data.test(msg):
-                if data.fire(msg):
-                    break
+                data.fire(msg)
