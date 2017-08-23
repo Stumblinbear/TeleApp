@@ -32,6 +32,8 @@ def start_bot(update):
 
 # Listen for /echo and reply with the message sent x times
 # Echo message must be wrapped in quotes
+# Arguments with no default value set in the function parameters
+# are required. If a default value is set, the argument is optional.
 # /echo "testing message"
 #        bot responds with "testing message" one time
 # /echo "testing message" 4
