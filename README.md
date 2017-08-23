@@ -51,6 +51,10 @@ from teleapp.deco.text import contains, equals, regex
 
 # Respond to messages containing "chill"
 @contains('chill')
+# Also responds to messages that are exactly equal to "wo chill"
+@equals('wo chil', sensitive=True)
+# Also respons to messages that start with 🅱️
+@regex('^🅱️')
 def respond_chill(update):
     update.sender.sendMessage('no u')
 ```
