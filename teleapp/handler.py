@@ -42,9 +42,10 @@ class TeleChat(telepot.helper.ChatHandler):
 
     def on_chat_message(self, message):
         # Don't reply to messages outside the reply threshold
-        date = message['date'] if not 'edit_date' in message else message['edit_date']
-        if date + self.bot.reply_threshold < int(time.time()):
-            return
+        if self.bot.reply_threshold > -1:
+            date = message['date'] if not 'edit_date' in message else message['edit_date']
+            if date + self.bot.reply_threshold < int(time.time()):
+                return
 
         update = UpdateWrapper(self, message)
 
