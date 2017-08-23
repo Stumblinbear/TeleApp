@@ -39,7 +39,7 @@ def start_bot(update):
 @cmd('echo')
 @arg('text')
 @arg('times', type=int)
-def start_bot(update, text, times=1):
+def bot_echo(update, text, times=1):
     for i in range(0, times):
       update.sender.sendMessage(text)
 ```
