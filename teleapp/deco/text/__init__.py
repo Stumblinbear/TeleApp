@@ -7,13 +7,13 @@ class TextTrigger(Trigger):
     def __init__(self):
         self.captures = []
 
-    def test(self, msg):
-        if 'edit_date' in msg.raw: return False
-        return msg.text is not None
+    def test(self, update):
+        if 'edit_date' in update.raw: return False
+        return update.text is not None
 
-    def fire(self, msg):
+    def fire(self, update):
         for capture in self.captures:
-            ret = capture(msg.text)
+            ret = capture(update.text)
             if ret:
                 if type(ret) is list or type(ret) is tuple:
                     return (ret,)

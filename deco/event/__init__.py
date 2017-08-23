@@ -7,12 +7,12 @@ class EventTrigger(Trigger):
     def __init__(self):
         self.events = []
 
-    def test(self, msg):
+    def test(self, update):
         return True
 
-    def fire(self, msg):
+    def fire(self, update):
         for event in self.events:
-            if event(msg):
+            if event(update):
                 return True
         return False
 
@@ -31,10 +31,10 @@ def add_event(lamb):
 def content_type(content_type):
     if content_type not in telepot.all_content_types:
         raise Exception('Content type must be one of the following: %r' % ', '.join(telepot.all_content_types))
-    return add_event(lambda msg: msg.content_type == content_type)
+    return add_event(lambda update: update.content_type == content_type)
 
 def edited_message(func):
-    return add_event(lambda msg: 'edit_date' in msg.raw)(func)
+    return add_event(lambda update: 'edit_date' in update.raw)(func)
 
 # Create an event decorator for each content type
 import sys

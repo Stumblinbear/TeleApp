@@ -9,15 +9,15 @@ class CommandTrigger(Trigger):
         self.args = []
         self.kwargs = []
 
-    def test(self, msg):
-        return msg.text is not None and msg.text[:1] == '/'
+    def test(self, update):
+        return update.text is not None and update.text[:1] == '/'
 
-    def fire(self, msg):
+    def fire(self, update):
         cmd_split = None
-        if msg.text.startswith('/%s@%s' % (self.command, msg.bot.username)):
-            cmd_split = msg.text.split('/%s@%s ' % (self.command, msg.bot.username), 1)
-        elif msg.text.startswith('/%s' % self.command):
-            cmd_split = msg.text.split('/%s ' % self.command, 1)
+        if update.text.startswith('/%s@%s' % (self.command, update.bot.username)):
+            cmd_split = update.text.split('/%s@%s ' % (self.command, update.bot.username), 1)
+        elif update.text.startswith('/%s' % self.command):
+            cmd_split = update.text.split('/%s ' % self.command, 1)
 
         if cmd_split is None:
             return False

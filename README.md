@@ -27,8 +27,8 @@ from teleapp.deco.cmd import cmd, arg
 
 # Listen to /start
 @cmd('start')
-def start_bot(msg):
-    msg.sender.sendMessage('Started!')
+def start_bot(update):
+    update.sender.sendMessage('Started!')
 
 # Listen for /echo and reply with the message sent x times
 # Echo message must be wrapped in quotes
@@ -39,9 +39,9 @@ def start_bot(msg):
 @cmd('echo')
 @arg('text')
 @arg('times', type=int)
-def start_bot(msg, text, times=1):
+def start_bot(update, text, times=1):
     for i in range(0, times):
-      msg.sender.sendMessage(text)
+      update.sender.sendMessage(text)
 ```
 
 Triggers:
@@ -51,8 +51,8 @@ from teleapp.deco.text import contains, equals, regex
 
 # Respond to messages containing "chill"
 @contains('chill')
-def respond_chill(msg):
-    msg.sender.sendMessage('no u')
+def respond_chill(update):
+    update.sender.sendMessage('no u')
 ```
 
 Events:
@@ -63,16 +63,16 @@ import teleapp.deco.event as event
 
 # Respond when a message with only text was received
 @event.content_type('text')
-def on_text_message(msg):
-    msg.sender.sendMessage('Received message with text')
+def on_text_message(update):
+    update.sender.sendMessage('Received message with text')
 
 # Respond when a message with only text was received
 @event.text
-def on_text_message(msg):
-    msg.sender.sendMessage('Received message with text')
+def on_text_message(update):
+    update.sender.sendMessage('Received message with text')
 
 # Respond when any message was edited
 @event.edit_message
-def on_edit_message(msg):
-    msg.sender.sendMessage('message was edited!')
+def on_edit_message(update):
+    update.sender.sendMessage('message was edited!')
 ```

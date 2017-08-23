@@ -6,7 +6,7 @@ import telepot
 from . import registry
 
 
-class MessageWrapper:
+class UpdateWrapper:
     def __init__(self, handler, raw):
         self.bot = handler.bot
         self.sender = handler.sender
@@ -15,6 +15,10 @@ class MessageWrapper:
 
         self.content_type, self.chat_type, self.chat_id = telepot.glance(raw)
         self.raw = raw
+
+    @property
+    def message(self):
+        return self.raw
 
     @property
     def id(self):
@@ -42,8 +46,8 @@ class TeleChat(telepot.helper.ChatHandler):
         if date + self.bot.reply_threshold < int(time.time()):
             return
 
-        msg = MessageWrapper(self, message)
+        update = UpdateWrapper(self, message)
 
         for func, data in registry.get_registered().items():
-            if data.test(msg):
-                data.fire(msg)
+            if data.test(update):
+                data.fire(update)
