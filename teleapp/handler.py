@@ -1,8 +1,11 @@
+import traceback
 import re
 import time
+import asyncio
 
 import telepot
 
+from . import botan
 from . import registry
 
 
@@ -13,7 +16,14 @@ class UpdateWrapper:
 
         self.flavor = telepot.flavor(raw)
 
-        self.content_type, self.chat_type, self.chat_id = telepot.glance(raw)
+        if self.flavor == 'inline_query':
+            self.query_id, self.from_id, self.query_string = telepot.glance(raw, flavor=self.flavor)
+            self.answerer = handler.answerer
+        elif self.flavor == 'chosen_inline_query':
+            self.result_id, self.from_id, self.query_string = telepot.glance(raw, flavor=self.flavor)
+        else:
+            self.content_type, self.chat_type, self.chat_id = telepot.glance(raw)
+
         self.raw = raw
 
     @property
@@ -28,7 +38,14 @@ class UpdateWrapper:
 
     @property
     def text(self):
-        return self.raw['text'] if 'text' in self.raw else None
+        if 'text' in self.raw: return self.raw['text']
+        if 'query' in self.raw: return self.raw['query']
+        return None
+
+    @property
+    def file_id(self):
+        if 'document' in self.raw: return self.raw['document']['file_id']
+        return None
 
     def glance(self):
         return telepot.glance(self.raw, flavor=self.flavor)
@@ -36,19 +53,44 @@ class UpdateWrapper:
     def content(self):
         return telepot.peel(self.raw)
 
-class TeleChat(telepot.helper.ChatHandler):
+    def answer(self, answer):
+        self.answerer.answer(self.raw, answer)
+
+class TeleChat(telepot.aio.helper.ChatHandler):
     def __init__(self, *args, **kwargs):
         super(TeleChat, self).__init__(*args, **kwargs)
 
-    def on_chat_message(self, message):
-        # Don't reply to messages outside the reply threshold
-        if self.bot.reply_threshold > -1:
+    async def on_chat_message(self, message):
+        await handle_message_thing(self, message, 'Message')
+
+class TeleInline(telepot.aio.helper.InlineUserHandler, telepot.aio.helper.AnswererMixin):
+    def __init__(self, *args, **kwargs):
+        super(TeleInline, self).__init__(*args, **kwargs)
+
+    async def on_inline_query(self, message):
+        await handle_message_thing(self, message, 'Inline')
+
+    async def on_chosen_inline_result(self, message):
+        await handle_message_thing(self, message, None)
+
+async def handle_message_thing(handler, message, event_name):
+    # Don't reply to messages outside the reply threshold
+    if handler.bot.reply_threshold > -1:
+        if 'date' in message:
             date = message['date'] if not 'edit_date' in message else message['edit_date']
-            if date + self.bot.reply_threshold < int(time.time()):
+            if date + handler.bot.reply_threshold < int(time.time()):
                 return
 
-        update = UpdateWrapper(self, message)
+    update = UpdateWrapper(handler, message)
 
-        for func, data in registry.get_registered().items():
-            if data.test(update):
-                data.fire(update)
+    triggered = False
+    for func, data in registry.get_registered().items():
+        if data.test(update):
+            success = await data.fire(update)
+            if success:
+                triggered = True
+    if event_name is not None and triggered:
+        botan.track(message['from']['id'], message, event_name)
+    else:
+        botan.track(message['from']['id'], message, 'Ignored')
+

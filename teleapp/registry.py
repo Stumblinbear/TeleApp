@@ -43,15 +43,17 @@ class FuncData:
             return False
         return self.trigger.test(update)
 
-    def fire(self, update):
+    async def fire(self, update):
         ret = self.trigger.fire(update)
         if ret is True:
-            self.func(update)
-            return True
+            ret = await self.func(update)
+            return ret is None
         if type(ret) is tuple or type(ret) is list:
             if len(ret) == 1:
-                self.func(update, *ret[0])
+                ret = await self.func(update, *ret[0])
             elif len(ret) == 2:
-                self.func(update, *ret[0], **ret[1])
-            return True
+                ret = await self.func(update, *ret[0], **ret[1])
+            else:
+                return False
+            return ret is None
         return False

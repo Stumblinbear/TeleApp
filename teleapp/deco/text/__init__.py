@@ -21,7 +21,7 @@ class TextTrigger(Trigger):
         return False
 
 def regex_parse(regex, test, sensitive):
-    match = re.search(regex, test) if sensitive else re.search(regex, test, flags=re.IGNORECASE)
+    match = re.search(regex, test) if sensitive else re.search(regex, test, flags=re.IGNORECASE | re.DOTALL)
     if not match: return False
     groups = match.groups()
     if len(groups) == 0:
